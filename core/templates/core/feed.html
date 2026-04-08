@@ -1,0 +1,286 @@
+{% load core_tags %}
+{% extends 'core/base.html' %}
+{% block title %}Feed — DeviX Connections{% endblock %}
+{% block extra_head %}
+<style>
+.page-layout { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+.sidebar { position: sticky; top: 80px; height: fit-content; }
+.sidebar-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; }
+.my-profile { text-align: center; }
+.profile-avatar-big { width: 72px; height: 72px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; font-weight: 700; margin: 0 auto 12px; overflow: hidden; border: 3px solid white; box-shadow: var(--shadow); }
+.profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; }
+.profile-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; }
+.profile-id { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+.profile-stats { display: flex; gap: 16px; justify-content: center; margin-top: 12px; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; }
+.stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.sidebar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; }
+.mini-student { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); text-decoration: none; color: var(--ink); transition: color 0.2s; }
+.mini-student:last-child { border-bottom: none; }
+.mini-student:hover { color: var(--accent); }
+.mini-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; overflow: hidden; flex-shrink: 0; }
+.mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mini-name { font-size: 0.875rem; font-weight: 500; }
+.mini-id { font-size: 0.75rem; color: var(--muted); }
+
+.post-composer { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+.composer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.type-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.type-tab { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; font-size: 0.8rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+.type-tab:hover, .type-tab.active { border-color: var(--accent); background: rgba(230,57,70,0.08); color: var(--accent); }
+.composer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+.media-btn { background: var(--paper); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); transition: all 0.2s; }
+.media-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.post-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; animation: fadeUp 0.3s ease both; transition: box-shadow 0.2s; }
+.post-card:hover { box-shadow: var(--shadow); }
+.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.post-header-info { flex: 1; }
+.post-author { font-weight: 600; font-size: 0.9rem; text-decoration: none; color: var(--ink); }
+.post-author:hover { color: var(--accent); }
+.post-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.post-type-badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; background: var(--paper); color: var(--muted); font-weight: 500; white-space: nowrap; }
+.post-content { font-size: 0.9rem; line-height: 1.6; margin-bottom: 14px; }
+.post-media { border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+.post-media img { width: 100%; max-height: 480px; object-fit: cover; display: block; }
+.post-media video, .post-media audio { width: 100%; }
+.post-actions { display: flex; gap: 4px; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.action-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--muted); transition: all 0.2s; text-decoration: none; }
+.action-btn:hover { background: var(--paper); color: var(--ink); }
+.action-btn.liked { color: var(--accent); }
+.action-btn.liked:hover { background: rgba(230,57,70,0.08); }
+.del-btn { margin-left: auto; }
+.del-btn:hover { color: var(--accent); background: rgba(230,57,70,0.08); }
+
+.comments-section { margin-top: 12px; }
+.comment-item { display: flex; gap: 8px; margin-bottom: 8px; }
+.comment-body { background: var(--paper); border-radius: 10px; padding: 8px 12px; flex: 1; }
+.comment-author-name { font-size: 0.78rem; font-weight: 600; margin-bottom: 2px; }
+.comment-text { font-size: 0.85rem; }
+.comment-time { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.comment-form { display: flex; gap: 8px; margin-top: 10px; }
+.comment-input { flex: 1; padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; background: var(--paper); }
+.comment-input:focus { border-color: var(--accent); }
+.comment-submit { background: var(--grad); color: white; border: none; border-radius: 20px; padding: 8px 16px; cursor: pointer; font-size: 0.85rem; }
+.comment-submit:hover { opacity: 0.85; }
+.no-posts { text-align: center; padding: 64px 32px; color: var(--muted); }
+.no-posts i { font-size: 3rem; margin-bottom: 12px; display: block; }
+@media (max-width: 768px) {
+  .page-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-layout">
+  <aside class="sidebar">
+    <div class="sidebar-card my-profile">
+      <div class="profile-avatar-big">
+        {% if user.profile.avatar %}<img src="{{ user.profile.avatar.url }}" alt="">
+        {% else %}{{ user.username|first|upper }}{% endif %}
+      </div>
+      <div class="profile-name">{{ user.profile.get_display_name }}</div>
+      <div class="profile-id">{{ user.profile.student_id }}</div>
+      <div class="profile-stats">
+        <div class="stat"><div class="stat-num">{{ user.posts.count }}</div><div class="stat-label">Posts</div></div>
+        <div class="stat"><div class="stat-num">{{ user.profile.follower_count }}</div><div class="stat-label">Followers</div></div>
+        <div class="stat"><div class="stat-num">{{ user.profile.following_count }}</div><div class="stat-label">Following</div></div>
+      </div>
+      <a href="{% url 'profile' user.username %}" class="btn btn-outline btn-sm" style="margin-top:14px;width:100%;justify-content:center;">View Profile</a>
+    </div>
+    <div class="sidebar-card">
+      <div class="sidebar-title">🎓 Students</div>
+      {% with students=user.profile|get_recent_students %}
+      {% for s in students %}
+        <a href="{% url 'profile' s.user.username %}" class="mini-student">
+          <div class="mini-avatar">
+            {% if s.avatar %}<img src="{{ s.avatar.url }}" alt="">{% else %}{{ s.user.username|first|upper }}{% endif %}
+          </div>
+          <div>
+            <div class="mini-name">{{ s.get_display_name }}</div>
+            <div class="mini-id">{{ s.student_id }}</div>
+          </div>
+        </a>
+      {% endfor %}
+      {% endwith %}
+      <a href="{% url 'students' %}" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:10px;">View All →</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="post-composer fade-up">
+      <div class="composer-header">
+        <div class="nav-avatar">
+          {% if user.profile.avatar %}<img src="{{ user.profile.avatar.url }}" alt="">
+          {% else %}{{ user.username|first|upper }}{% endif %}
+        </div>
+        <span style="color:var(--muted);font-size:0.9rem;">What's on your mind, {{ user.profile.get_display_name }}?</span>
+      </div>
+      <form method="post" enctype="multipart/form-data" id="postForm">
+        {% csrf_token %}
+        <div class="type-tabs">
+          {% for val, label in form.post_type.field.choices %}
+          <button type="button" class="type-tab" data-val="{{ val }}" onclick="selectType(this,'{{ val }}')">{{ label }}</button>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="post_type" id="post_type_val" value="thought">
+        <textarea name="content" class="form-input" rows="3" placeholder="Share your thoughts, studies, or anything..."></textarea>
+        <div class="composer-actions">
+          <label class="media-btn" for="mediaUpload">
+            <i class="fa-solid fa-paperclip"></i> Attach Media
+            <input type="file" name="media" id="mediaUpload" accept="image/*,video/*,audio/*" style="display:none" onchange="showFileName(this)">
+          </label>
+          <span id="fileName" style="font-size:0.78rem;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <button type="submit" class="btn btn-primary">Post <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </form>
+    </div>
+
+    {% if posts %}
+    {% for post in posts %}
+    <div class="post-card" id="post-{{ post.id }}">
+      <div class="post-header">
+        <a href="{% url 'profile' post.author.username %}">
+          <div class="nav-avatar" style="width:44px;height:44px;font-size:1rem;">
+            {% if post.author.profile.avatar %}<img src="{{ post.author.profile.avatar.url }}" alt="">
+            {% else %}{{ post.author.username|first|upper }}{% endif %}
+          </div>
+        </a>
+        <div class="post-header-info">
+          <a href="{% url 'profile' post.author.username %}" class="post-author">{{ post.author.profile.get_display_name }}</a>
+          <div class="post-meta">{{ post.author.profile.student_id }} &bull; {{ post.created_at|timesince }} ago</div>
+        </div>
+        <span class="post-type-badge">{{ post.get_post_type_display }}</span>
+      </div>
+
+      {% if post.content %}<div class="post-content">{{ post.content|linebreaks }}</div>{% endif %}
+
+      {% if post.media %}
+      <div class="post-media">
+        {% with ext=post.media.name|lower %}
+        {% if ".jpg" in ext or ".jpeg" in ext or ".png" in ext or ".webp" in ext or ".gif" in ext %}
+          <img src="{{ post.media.url }}" alt="Post media" loading="lazy">
+        {% elif ".mp4" in ext or ".mov" in ext or ".webm" in ext %}
+          <video controls><source src="{{ post.media.url }}"></video>
+        {% elif ".mp3" in ext or ".ogg" in ext or ".m4a" in ext or ".opus" in ext or ".wav" in ext %}
+          <audio controls><source src="{{ post.media.url }}"></audio>
+        {% else %}
+          <a href="{{ post.media.url }}" target="_blank" class="btn btn-outline btn-sm"><i class="fa-solid fa-file"></i> View Attachment</a>
+        {% endif %}
+        {% endwith %}
+      </div>
+      {% endif %}
+
+      <div class="post-actions">
+        <button class="action-btn {% if request.user in post.likes.all %}liked{% endif %}" data-post="{{ post.id }}" onclick="toggleLike({{ post.id }}, this)">
+          <i class="fa-{% if request.user in post.likes.all %}solid{% else %}regular{% endif %} fa-heart"></i>
+          <span class="like-count">{{ post.like_count }}</span>
+        </button>
+        <button class="action-btn" onclick="toggleComments({{ post.id }})">
+          <i class="fa-regular fa-comment"></i> <span>{{ post.comments.count }}</span>
+        </button>
+        {% if post.author != request.user %}
+        <a href="{% url 'chat' post.author.username %}" class="action-btn">
+          <i class="fa-regular fa-paper-plane"></i> Message
+        </a>
+        {% endif %}
+        {% if post.author == request.user or request.user.is_staff %}
+        <form method="post" action="{% url 'delete_post' post.id %}" style="margin-left:auto;">
+          {% csrf_token %}
+          <button type="submit" class="action-btn del-btn" onclick="return confirm('Delete this post?')">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+
+      <div class="comments-section" id="comments-{{ post.id }}" style="display:none">
+        <div class="comments-list" id="comments-list-{{ post.id }}">
+          {% for comment in post.comments.all %}
+          <div class="comment-item">
+            <div class="nav-avatar" style="width:32px;height:32px;font-size:0.75rem;flex-shrink:0;">
+              {% if comment.author.profile.avatar %}<img src="{{ comment.author.profile.avatar.url }}" alt="">
+              {% else %}{{ comment.author.username|first|upper }}{% endif %}
+            </div>
+            <div class="comment-body">
+              <div class="comment-author-name">{{ comment.author.profile.get_display_name }}</div>
+              <div class="comment-text">{{ comment.content }}</div>
+              <div class="comment-time">{{ comment.created_at|timesince }} ago</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="comment-form">
+          <input type="text" class="comment-input" placeholder="Add a comment..." id="comment-input-{{ post.id }}">
+          <button class="comment-submit" onclick="submitComment({{ post.id }})"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="no-posts fade-up">
+      <i class="fa-regular fa-newspaper"></i>
+      <p style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem;">No posts yet</p>
+      <p style="margin-top:6px;font-size:0.9rem;">Be the first to share something!</p>
+    </div>
+    {% endif %}
+  </main>
+</div>
+
+<script>
+function selectType(btn, val) {
+  document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('post_type_val').value = val;
+}
+document.querySelector('.type-tab').classList.add('active');
+
+function showFileName(input) {
+  document.getElementById('fileName').textContent = input.files[0]?.name || '';
+}
+
+function toggleLike(postId, btn) {
+  fetch(`/like/${postId}/`, {method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+  .then(r=>r.json()).then(data=>{
+    btn.querySelector('.like-count').textContent = data.count;
+    const icon = btn.querySelector('i');
+    if(data.liked){btn.classList.add('liked');icon.className='fa-solid fa-heart';}
+    else{btn.classList.remove('liked');icon.className='fa-regular fa-heart';}
+  });
+}
+
+function toggleComments(postId) {
+  const el = document.getElementById('comments-'+postId);
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+function submitComment(postId) {
+  const input = document.getElementById('comment-input-'+postId);
+  const text = input.value.trim();
+  if(!text) return;
+  fetch(`/comment/${postId}/`, {
+    method:'POST',
+    headers:{'X-CSRFToken':getCookie('csrftoken'),'Content-Type':'application/x-www-form-urlencoded'},
+    body:`content=${encodeURIComponent(text)}`
+  }).then(r=>r.json()).then(data=>{
+    if(data.success){
+      const list = document.getElementById('comments-list-'+postId);
+      list.insertAdjacentHTML('beforeend',`<div class="comment-item">
+        <div class="nav-avatar" style="width:32px;height:32px;font-size:0.75rem;flex-shrink:0;">${data.avatar?`<img src="${data.avatar}">`:data.author[0].toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-author-name">${data.author}</div>
+          <div class="comment-text">${data.content}</div>
+          <div class="comment-time">${data.created_at}</div>
+        </div></div>`);
+      input.value='';
+    }
+  });
+}
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?'+name+'=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+</script>
+{% endblock %}
