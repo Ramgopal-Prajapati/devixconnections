@@ -28,8 +28,8 @@ python manage.py runserver
 ## 🔐 Admin Credentials (Ram Sir)
 | Field | Value |
 |-------|-------|
-| Username | `ramsir` |
-| Password | `RamSir@2024` |
+| Username | `` |
+| Password | `` |
 
 ---
 
